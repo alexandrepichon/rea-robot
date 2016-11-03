@@ -22,7 +22,7 @@ class ToyRobotSimulatorTest extends FlatSpec with Matchers {
   }
 
   "Example b" should "report 0,0,WEST" in {
-    ToyRobotSimulator("PLACE 0,0,NORTH", "LEF", "REPORT") should be("0,0,WEST")
+    ToyRobotSimulator("PLACE 0,0,NORTH", "LEFT", "REPORT") should be("0,0,WEST")
   }
 
   "Example c" should "report 3,3,NORTH" in {
@@ -31,6 +31,10 @@ class ToyRobotSimulatorTest extends FlatSpec with Matchers {
 
   "ToyRobotSimulator" should "read a file input" in {
     ToyRobotSimulator.main(Array("./commands.txt")) should be(())
+  }
+
+  "PLACE 0,0,NORTH REPORT" should "report 0,0,NORTH" in {
+    ToyRobotSimulator("PLACE 0,0,NORTH", "REPORT") should be("0,0,NORTH")
   }
 
 }
