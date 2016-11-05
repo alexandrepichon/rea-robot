@@ -21,12 +21,31 @@ class SimulationEngine {
       case ReportCommand =>
         ReportResult(xState.get, yState.get, directionState.get)
       case MoveCommand =>
-        if (directionState.contains(North)) yState = yState.map(_+1)
-        if (directionState.contains(South)) yState = yState.map(_-1)
-        if (directionState.contains(East)) xState = xState.map(_+1)
-        if (directionState.contains(West)) xState = xState.map(_-1)
+        (directionState, xState, yState) match {
+          case (Some(North), _, Some(5)) =>
+            IgnoredCommandResult(s"$MoveCommand to $North ignored: robot already at the top")
+          case (Some(South), _, Some(0)) =>
+            IgnoredCommandResult(s"$MoveCommand to $South ignored: robot already at the bottom")
+          case (Some(East), Some(5), _) =>
+            IgnoredCommandResult(s"$MoveCommand to $East ignored: robot already at the right")
+          case (Some(West), Some(0), _) =>
+            IgnoredCommandResult(s"$MoveCommand to $West ignored: robot already at the left")
 
-        SilentResult
+          case (Some(North), _, Some(y)) =>
+            yState = Some(y+1)
+            SilentResult
+          case (Some(South), _, Some(y)) =>
+            yState = Some(y-1)
+            SilentResult
+          case (Some(East), Some(x), _) =>
+            xState = Some(x+1)
+            SilentResult
+          case (Some(West), Some(x), _) =>
+            xState = Some(x-1)
+            SilentResult
+
+          case _ => ???
+        }
       case LeftCommand =>
         directionState = directionState.map(_.left)
         SilentResult
