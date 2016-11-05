@@ -46,17 +46,22 @@ class LexicalAnalyzer {
 
   def parsePlaceCommand(command: String): Either[SyntaxError, PlaceCommand] with Product with Serializable = {
     val placeArgs: Seq[String] = command.drop(PLACE_PREFIX.length).split(",")
-    val tryX = Try(placeArgs(0).toInt)
-    val tryY = Try(placeArgs(1).toInt)
-    val opDirection = Direction(placeArgs(2))
-    if (tryX.isFailure) {
-      Left(SyntaxError(s"PLACE X,Y,DIR unexpected X argument in command : $command"))
-    } else if (tryY.isFailure) {
-      Left(SyntaxError(s"PLACE X,Y,DIR unexpected Y argument in command : $command"))
-    } else if (opDirection.isEmpty) {
-      Left(SyntaxError(s"PLACE X,Y,DIR unexpected DIR argument in command : $command"))
+    if (placeArgs.size != 3) {
+      Left(SyntaxError(s"PLACE X,Y,DIR need three arguments : $command"))
     } else {
-      Right(PlaceCommand(tryX.get, tryY.get, opDirection.get))
+      val tryX = Try(placeArgs(0).toInt)
+      val tryY = Try(placeArgs(1).toInt)
+      val opDirection = Direction(placeArgs(2))
+      if (tryX.isFailure) {
+        Left(SyntaxError(s"PLACE X,Y,DIR unexpected X argument in command : $command"))
+      } else if (tryY.isFailure) {
+        Left(SyntaxError(s"PLACE X,Y,DIR unexpected Y argument in command : $command"))
+      } else if (opDirection.isEmpty) {
+        Left(SyntaxError(s"PLACE X,Y,DIR unexpected DIR argument in command : $command"))
+      } else {
+        Right(PlaceCommand(tryX.get, tryY.get, opDirection.get))
+      }
     }
+
   }
 }
