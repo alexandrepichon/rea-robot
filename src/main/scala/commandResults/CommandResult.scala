@@ -9,3 +9,6 @@ case object SilentResult extends CommandResult {
 case class ReportResult(x: Int, y: Int, direction: Direction) extends CommandResult {
   override def toString: String = s"$x,$y,$direction"
 }
+case class IgnoredCommandResult(reason: String) {
+  override def toString: String = s"Command ignored because $reason"
+}
