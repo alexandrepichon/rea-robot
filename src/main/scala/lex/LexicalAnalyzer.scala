@@ -15,30 +15,9 @@ class LexicalAnalyzer {
     val errors = new ArrayBuffer[SyntaxError]()
 
     commands.foreach { command =>
-      if (command.startsWith(PLACE_PREFIX)) {
-        val placeArgs:Seq[String] = command.drop(PLACE_PREFIX.length).split(",")
-        val tryX = Try { placeArgs(0).toInt }
-        val tryY = Try { placeArgs(1).toInt }
-        val opDirection = Direction(placeArgs(2))
-        if (tryX.isFailure) {
-          errors.append(SyntaxError(s"PLACE X,Y,DIR unexpected X argument in command : $command"))
-        } else if (tryY.isFailure) {
-          errors.append(SyntaxError(s"PLACE X,Y,DIR unexpected Y argument in command : $command"))
-        } else if (opDirection.isEmpty) {
-          errors.append(SyntaxError(s"PLACE X,Y,DIR unexpected DIR argument in command : $command"))
-        } else {
-          parsedCommands.append(PlaceCommand(tryX.get, tryY.get, opDirection.get))
-        }
-      } else if (command == "REPORT") {
-        parsedCommands.append(ReportCommand)
-      } else if (command == "MOVE") {
-        parsedCommands.append(MoveCommand)
-      } else if (command == "LEFT") {
-        parsedCommands.append(LeftCommand)
-      } else if (command == "RIGHT") {
-        parsedCommands.append(RightCommand)
-      } else {
-        errors.append(SyntaxError(s"Unknown command : $command"))
+      parseCommand(command) match {
+        case Left(syntaxError) => errors.append(syntaxError)
+        case Right(parsedCommand) => parsedCommands.append(parsedCommand)
       }
     }
 
@@ -46,6 +25,38 @@ class LexicalAnalyzer {
       Right(parsedCommands.toList)
     } else {
       Left(errors.toList)
+    }
+  }
+
+  def parseCommand(command: String): Either[SyntaxError, Command] = {
+    if (command.startsWith(PLACE_PREFIX)) {
+      parsePlaceCommand(command)
+    } else if (command == "REPORT") {
+      Right(ReportCommand)
+    } else if (command == "MOVE") {
+      Right(MoveCommand)
+    } else if (command == "LEFT") {
+      Right(LeftCommand)
+    } else if (command == "RIGHT") {
+      Right(RightCommand)
+    } else {
+      Left(SyntaxError(s"Unknown command : $command"))
+    }
+  }
+
+  def parsePlaceCommand(command: String): Either[SyntaxError, PlaceCommand] with Product with Serializable = {
+    val placeArgs: Seq[String] = command.drop(PLACE_PREFIX.length).split(",")
+    val tryX = Try(placeArgs(0).toInt)
+    val tryY = Try(placeArgs(1).toInt)
+    val opDirection = Direction(placeArgs(2))
+    if (tryX.isFailure) {
+      Left(SyntaxError(s"PLACE X,Y,DIR unexpected X argument in command : $command"))
+    } else if (tryY.isFailure) {
+      Left(SyntaxError(s"PLACE X,Y,DIR unexpected Y argument in command : $command"))
+    } else if (opDirection.isEmpty) {
+      Left(SyntaxError(s"PLACE X,Y,DIR unexpected DIR argument in command : $command"))
+    } else {
+      Right(PlaceCommand(tryX.get, tryY.get, opDirection.get))
     }
   }
 }
