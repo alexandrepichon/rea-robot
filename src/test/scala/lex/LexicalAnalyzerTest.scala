@@ -20,6 +20,10 @@ class LexicalAnalyzerTest extends FunSuite with Matchers {
     lex.parse(Seq("PLACE 0,0,LEFT")) should be('left)
   }
 
+  test("PLACE with missing arg should fail") {
+    lex.parse(Seq("PLACE 0,0")) should be('left)
+  }
+
   test("PLACE 5,0,EAST should be parsed") {
     lex.parse(Seq("PLACE 5,0,EAST")) should be(Right(Seq(PlaceCommand(5, 0, East))))
   }
