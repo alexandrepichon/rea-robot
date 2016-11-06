@@ -14,10 +14,16 @@ class SimulationEngine {
   def run(command: Command): CommandResult = {
     command match {
       case PlaceCommand(x,y, direction) =>
-        xState = Some(x)
-        yState = Some(y)
-        directionState = Some(direction)
-        SilentResult
+        if (x < 0 || x > 5) {
+          IgnoredCommandResult("PLACE X,Y,DIR: X should be between 0 and 5")
+        } else if (y < 0 || y > 5) {
+          IgnoredCommandResult("PLACE X,Y,DIR: Y should be between 0 and 5")
+        } else {
+          xState = Some(x)
+          yState = Some(y)
+          directionState = Some(direction)
+          SilentResult
+        }
       case ReportCommand =>
         if (isPlaced()) {
           ReportResult(xState.get, yState.get, directionState.get)
