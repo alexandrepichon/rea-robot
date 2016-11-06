@@ -6,18 +6,21 @@ import util.Direction
 import util.Direction._
 
 class SimulationEngine {
+  private val TABLE_MIN = 0
+  private val TABLE_MAX = 5
 
-  var xState: Option[Int] = None
-  var yState: Option[Int] = None
-  var directionState: Option[Direction] = None
+
+  private var xState: Option[Int] = None
+  private var yState: Option[Int] = None
+  private var directionState: Option[Direction] = None
 
   def run(command: Command): CommandResult = {
     command match {
       case PlaceCommand(x,y, direction) =>
-        if (x < 0 || x > 5) {
-          IgnoredCommandResult("PLACE X,Y,DIR: X should be between 0 and 5")
-        } else if (y < 0 || y > 5) {
-          IgnoredCommandResult("PLACE X,Y,DIR: Y should be between 0 and 5")
+        if (x < TABLE_MIN || x > TABLE_MAX) {
+          IgnoredCommandResult(s"PLACE X,Y,DIR: X should be between $TABLE_MIN and $TABLE_MAX")
+        } else if (y < TABLE_MIN || y > TABLE_MAX) {
+          IgnoredCommandResult(s"PLACE X,Y,DIR: Y should be between $TABLE_MIN and $TABLE_MAX")
         } else {
           xState = Some(x)
           yState = Some(y)
@@ -56,13 +59,13 @@ class SimulationEngine {
 
   private def runMove(): CommandResult = {
     (directionState, xState, yState) match {
-      case (Some(North), _, Some(5)) =>
+      case (Some(North), _, Some(TABLE_MAX)) =>
         IgnoredCommandResult(s"$MoveCommand to $North ignored: robot already at the top")
-      case (Some(South), _, Some(0)) =>
+      case (Some(South), _, Some(TABLE_MIN)) =>
         IgnoredCommandResult(s"$MoveCommand to $South ignored: robot already at the bottom")
-      case (Some(East), Some(5), _) =>
+      case (Some(East), Some(TABLE_MAX), _) =>
         IgnoredCommandResult(s"$MoveCommand to $East ignored: robot already at the right")
-      case (Some(West), Some(0), _) =>
+      case (Some(West), Some(TABLE_MIN), _) =>
         IgnoredCommandResult(s"$MoveCommand to $West ignored: robot already at the left")
 
       case (None, None, None) =>
