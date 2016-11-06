@@ -43,6 +43,9 @@ class SimulationEngine {
       case (Some(West), Some(0), _) =>
         IgnoredCommandResult(s"$MoveCommand to $West ignored: robot already at the left")
 
+      case (None, None, None) =>
+        IgnoredCommandResult(s"$MoveCommand ignored: expect $PlaceCommand command before")
+
       case (Some(North), _, Some(y)) =>
         yState = Some(y + 1)
         SilentResult
