@@ -19,18 +19,34 @@ class SimulationEngine {
         directionState = Some(direction)
         SilentResult
       case ReportCommand =>
-        ReportResult(xState.get, yState.get, directionState.get)
+        if (isPlaced()) {
+          ReportResult(xState.get, yState.get, directionState.get)
+        } else {
+          IgnoredCommandResult(s"$ReportCommand ignored: expect $PlaceCommand command before")
+        }
       case MoveCommand =>
         runMove()
       case LeftCommand =>
-        directionState = directionState.map(_.left)
-        SilentResult
+        if (isPlaced()) {
+          directionState = directionState.map(_.left)
+          SilentResult
+        } else {
+          IgnoredCommandResult(s"$LeftCommand ignored: expect $PlaceCommand command before")
+        }
       case RightCommand =>
-        directionState = directionState.map(_.right)
-        SilentResult
+        if (isPlaced()) {
+          directionState = directionState.map(_.right)
+          SilentResult
+        } else {
+          IgnoredCommandResult(s"$RightCommand ignored: expect $PlaceCommand command before")
+        }
     }
   }
 
+
+  private def isPlaced(): Boolean = {
+    xState.isDefined && yState.isDefined && directionState.isDefined
+  }
 
   private def runMove(): CommandResult = {
     (directionState, xState, yState) match {
