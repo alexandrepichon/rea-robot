@@ -70,6 +70,15 @@ class SimulationEngineTest extends FunSuite with Matchers {
     }
   }
 
+  test("can't move down and left at 00") {
+    new Engine {
+      engine.place(0,0,South)
+      engine.move() should be(ignored)
+      engine.right()
+      engine.move() should be(ignored)
+    }
+  }
+
 }
 
 trait CommandResultMatchers {
