@@ -6,14 +6,21 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 object ToyRobotSimulator extends App {
-  apply(Source.fromFile(args(0)).getLines().toSeq:_*)
+  if (args.length == 1) {
+    apply(Source.fromFile(args(0)).getLines().toSeq:_*)
+  } else {
+    Console.err.println("""
+      |Usage: ToyRobotSimulator FILE
+      |examples at https://github.com/alexandrepichon/rea-robot/blob/master/PROBLEM.md
+    """.stripMargin)
+  }
 
   def apply(commands: String*): String = {
     val lex = new LexicalAnalyzer()
-    
+
     lex.parse(commands) match {
       case Left(syntaxErrors) =>
-        syntaxErrors.map(println)
+        syntaxErrors.map(Console.err.println)
         syntaxErrors.mkString("\n")
 
       case Right(parsedCommands) =>
