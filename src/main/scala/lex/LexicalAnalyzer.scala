@@ -28,7 +28,7 @@ class LexicalAnalyzer {
     }
   }
 
-  def parseCommand(command: String): Either[SyntaxError, Command] = {
+  private def parseCommand(command: String): Either[SyntaxError, Command] = {
     if (command.startsWith(PLACE_PREFIX)) {
       parsePlaceCommand(command)
     } else if (command == "REPORT") {
@@ -44,7 +44,7 @@ class LexicalAnalyzer {
     }
   }
 
-  def parsePlaceCommand(command: String): Either[SyntaxError, PlaceCommand] with Product with Serializable = {
+  private def parsePlaceCommand(command: String): Either[SyntaxError, PlaceCommand] = {
     val placeArgs: Seq[String] = command.drop(PLACE_PREFIX.length).split(",")
     if (placeArgs.size != 3) {
       Left(SyntaxError(s"PLACE X,Y,DIR need three arguments : $command"))

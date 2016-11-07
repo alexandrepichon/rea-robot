@@ -1,11 +1,11 @@
 package simulation
 
-import commandResults.{CommandResult, IgnoredCommandResult, ReportResult}
-import commands._
 import org.scalatest.matchers.{BeMatcher, MatchResult}
 import org.scalatest.{FunSuite, Matchers}
 import util.Direction.{North, South, West}
 import CommandResultMatchers._
+
+import scala.util.Try
 
 class SimulationEngineTest extends FunSuite with Matchers {
 
@@ -15,57 +15,58 @@ class SimulationEngineTest extends FunSuite with Matchers {
   }
 
   trait EngineAt00N extends Engine {
-    engine.run(PlaceCommand(0, 0, North))
+    engine.place(0, 0, North)
   }
-
 
 
   // Tests
   test("should ignore the sixth move") {
     new EngineAt00N {
-      (1 to 5).foreach(_ => engine.run(MoveCommand))
-      engine.run(MoveCommand) should be(ignored)
+      (1 to 5).foreach(_ => engine.move())
+      engine.move() should be(ignored)
     }
   }
 
   test("should ignore MOVE before PLACE") {
     new Engine {
-      engine.run(MoveCommand) should be(ignored)
+      engine.move() should be(ignored)
     }
   }
 
   test("should ignore REPORT before PLACE") {
     new Engine {
-      engine.run(ReportCommand) should be(ignored)
+      an [CommandIgnoredException] should be thrownBy {
+        engine.report().get
+      }
     }
   }
 
   test("should ignore LEFT and RIGHT before PLACE") {
     new Engine {
-      engine.run(LeftCommand) should be(ignored)
-      engine.run(RightCommand) should be(ignored)
+      engine.left() should be(ignored)
+      engine.left() should be(ignored)
     }
   }
 
   test("REPORT should give robot position") {
     new EngineAt00N {
-      engine.run(ReportCommand) should be(ReportResult(0, 0, North))
+      engine.report().get should be(Report(0, 0, North))
     }
   }
 
   test("can PLACE twice") {
     new EngineAt00N {
-      engine.run(PlaceCommand(5,5,West))
-      engine.run(ReportCommand) should be(ReportResult(5, 5, West))
+      engine.place(5,5,West)
+      engine.report().get should be(Report(5, 5, West))
     }
   }
 
   test("PLACE outside the table should be ignored") {
     new Engine {
-      engine.run(PlaceCommand(6,0,South)) should be(ignored)
-      engine.run(PlaceCommand(3,100,South)) should be(ignored)
-      engine.run(PlaceCommand(-1,4,South)) should be(ignored)
-      engine.run(PlaceCommand(5,-2,South)) should be(ignored)
+      engine.place(6,0,South) should be(ignored)
+      engine.place(3,100,South) should be(ignored)
+      engine.place(-1,4,South) should be(ignored)
+      engine.place(5,-2,South) should be(ignored)
     }
   }
 
@@ -73,15 +74,15 @@ class SimulationEngineTest extends FunSuite with Matchers {
 
 trait CommandResultMatchers {
 
-  class IgnoredMatcher extends BeMatcher[CommandResult] {
-    def apply(left: CommandResult) =
+  class IgnoredMatcher extends BeMatcher[Try[Unit]] {
+    def apply(left: Try[Unit]) =
       MatchResult(
-        left.toString.contains(" ignored "),
-        left.getClass.getSimpleName + " was not ignored",
+        left.isFailure,
+        left + " was not ignored",
         left.toString + " was ignored"
       )
   }
-  val ignored = new IgnoredMatcher
+  def ignored = new IgnoredMatcher
 }
 object CommandResultMatchers extends CommandResultMatchers
 
